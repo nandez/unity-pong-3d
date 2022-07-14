@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float Speed;
+    public float speed = 20f;
 
     private Rigidbody rb;
 
@@ -15,11 +15,11 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.UpArrow))
         {
-            rb.velocity = new Vector3(0, 0, Speed);
+            rb.velocity = new Vector3(0, 0, speed);
         }
         else if (Input.GetKey(KeyCode.DownArrow))
         {
-            rb.velocity = new Vector3(0, 0, -Speed);
+            rb.velocity = new Vector3(0, 0, -speed);
         }
         else
         {
