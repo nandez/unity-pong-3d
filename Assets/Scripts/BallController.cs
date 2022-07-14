@@ -4,6 +4,7 @@ public class BallController : MonoBehaviour
 {
     public GameManager scoreManager;
     public float speed = 30f;
+    public GameObject goalFx;
 
     public Vector3 Direction { get; private set; }
 
@@ -32,8 +33,8 @@ public class BallController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        var normal = collision.GetContact(0).normal;
-        var reflectDirection = Vector3.Reflect(Direction, normal);
+        var contact = collision.GetContact(0);
+        var reflectDirection = Vector3.Reflect(Direction, contact.normal);
 
         // Randomize the z axis to give some variance.
         reflectDirection.z += reflectDirection.z < 0 ? Random.Range(-0.025f, 0f) : Random.Range(0f, 0.025f);
@@ -45,11 +46,13 @@ public class BallController : MonoBehaviour
         if (collision.collider.CompareTag("AiGoal"))
         {
             scoreManager.OnPlayerScore();
+            Instantiate(goalFx, contact.point, Quaternion.identity);
             transform.position = initialPosition;
         }
         else if (collision.collider.CompareTag("PlayerGoal"))
         {
             scoreManager.OnAiScore();
+            Instantiate(goalFx, contact.point, Quaternion.identity);
             transform.position = initialPosition;
         }
     }
