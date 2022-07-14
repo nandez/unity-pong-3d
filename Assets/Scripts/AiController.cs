@@ -6,9 +6,15 @@ public class AiController : MonoBehaviour
 
     public float speed = 20f;
     public float lerpSpeed = 5f;
+    public float zMaxOffset = 1.75f;
 
     private Rigidbody rb;
     private Vector3 initialPosition;
+
+    public void ResetPosition()
+    {
+        transform.position = initialPosition;
+    }
 
     private void Awake()
     {
@@ -18,21 +24,30 @@ public class AiController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // By default, moves AI pad towards initial position.
-        var movement = initialPosition;
+        var movement = Vector3.zero;
 
-        // But if the ball is coming to the AI side, we start following the ball direction.
+        // Checks if the ball is coming to ai side in order to start chasing the ball..
         if (ball.Direction.x < 0)
         {
-            // Determines the if the paddle should be moved up / down (z axis) based on ball position.
-            if (ball.transform.position.z > transform.position.z)
-                movement = Vector3.forward;
-            else if (ball.transform.position.z < transform.position.z)
-                movement = Vector3.back;
-            else
-                movement = Vector3.zero;
-        }
+            // Generates a random offset value representing the distance between the middle of the paddle to edge.
+            // This value will be used to move the paddle with a random behavior avoiding always hitting the ball
+            // with the center.
+            var offset = Random.Range(0, zMaxOffset);
 
+            // Compares positions against z axis to determine the direction to move the paddle.
+            if (ball.transform.position.z > transform.position.z + offset)
+                movement = Vector3.forward;
+            else if (ball.transform.position.z < transform.position.z - offset)
+                movement = Vector3.back;
+        }
+        else
+        {
+            // In this case, we move the paddle towards initial position..
+            if (initialPosition.z > transform.position.z)
+                movement = Vector3.forward;
+            else if (initialPosition.z < transform.position.z)
+                movement = Vector3.back;
+        }
 
         rb.velocity = Vector3.Lerp(rb.velocity, movement * speed, lerpSpeed * Time.fixedDeltaTime);
     }

@@ -5,10 +5,17 @@ public class PlayerController : MonoBehaviour
     public float speed = 20f;
 
     private Rigidbody rb;
+    private Vector3 initialPosition;
+
+    public void ResetPosition()
+    {
+        transform.position = initialPosition;
+    }
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        initialPosition = transform.position;
     }
 
     private void Update()
