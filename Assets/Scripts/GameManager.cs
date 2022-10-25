@@ -19,9 +19,18 @@ public class GameManager : MonoBehaviour
             Instance = this;
     }
 
+    private void Start()
+    {
+        infoMessageText.SetText("(Press SPACEBAR or MOUSE to start)");
+        infoMessageText.gameObject.SetActive(true);
+    }
+
     public static void SetGameState(GameState state)
     {
         // TODO: validate state change...
+        if (state == GameState.PLAY)
+            Instance.infoMessageText.gameObject.SetActive(false);
+
         Instance.State = state;
     }
 
@@ -30,7 +39,7 @@ public class GameManager : MonoBehaviour
         SetGameState(GameState.SCORE);
         playerScore++;
         playerScoreText.SetText($"Player: {playerScore}");
-        infoMessageText.SetText("Player Scored!");
+        infoMessageText.SetText("You Scored!");
         infoMessageText.gameObject.SetActive(true);
 
         Invoke(nameof(ResetToServeState), 2f);
@@ -49,7 +58,7 @@ public class GameManager : MonoBehaviour
 
     private void ResetToServeState()
     {
+        infoMessageText.SetText("(Press SPACEBAR or MOUSE to start)");
         SetGameState(GameState.SERVE);
-        infoMessageText.gameObject.SetActive(false);
     }
 }
