@@ -6,6 +6,10 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public GameState State { get; private set; } = GameState.SERVE;
 
+    [SerializeField] private TMPro.TMP_Text aiScoreText;
+    [SerializeField] private TMPro.TMP_Text playerScoreText;
+    [SerializeField] private TMPro.TMP_Text infoMessageText;
+
     private int playerScore;
     private int aiScore;
 
@@ -25,6 +29,9 @@ public class GameManager : MonoBehaviour
     {
         SetGameState(GameState.SCORE);
         playerScore++;
+        playerScoreText.SetText($"Player: {playerScore}");
+        infoMessageText.SetText("Player Scored!");
+        infoMessageText.gameObject.SetActive(true);
 
         Invoke(nameof(ResetToServeState), 2f);
     }
@@ -33,6 +40,9 @@ public class GameManager : MonoBehaviour
     {
         SetGameState(GameState.SCORE);
         aiScore++;
+        aiScoreText.SetText($"AI: {aiScore}");
+        infoMessageText.SetText("AI Scored!");
+        infoMessageText.gameObject.SetActive(true);
 
         Invoke(nameof(ResetToServeState), 2f);
     }
@@ -40,5 +50,6 @@ public class GameManager : MonoBehaviour
     private void ResetToServeState()
     {
         SetGameState(GameState.SERVE);
+        infoMessageText.gameObject.SetActive(false);
     }
 }
