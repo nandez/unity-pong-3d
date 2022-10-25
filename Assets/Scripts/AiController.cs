@@ -2,53 +2,43 @@ using UnityEngine;
 
 public class AiController : MonoBehaviour
 {
-    public BallController ball;
+    [SerializeField] private BallController ball;
+    [SerializeField] private float speed = 2f;
+    [SerializeField] private float topWallLimit = 14f;
+    [SerializeField] private float bottomWallLimit = 41f;
 
-    public float speed = 20f;
-    public float lerpSpeed = 5f;
-    public float zMaxOffset = 1.75f;
-
+    private float offset = 2f;
     private Rigidbody rb;
     private Vector3 initialPosition;
 
-    public void ResetPosition()
-    {
-        transform.position = initialPosition;
-    }
-
-    private void Awake()
+    private void Start()
     {
         rb = GetComponent<Rigidbody>();
         initialPosition = transform.position;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        var movement = Vector3.zero;
 
-        // Checks if the ball is coming to ai side in order to start chasing the ball..
-        if (ball.Direction.x < 0)
+        if (GameManager.Instance.State == GameState.PLAY)
         {
-            // Generates a random offset value representing the distance between the middle of the paddle to edge.
-            // This value will be used to move the paddle with a random behavior avoiding always hitting the ball
-            // with the center.
-            var offset = Random.Range(0, zMaxOffset);
-
-            // Compares positions against z axis to determine the direction to move the paddle.
             if (ball.transform.position.z > transform.position.z + offset)
-                movement = Vector3.forward;
+            {
+                transform.position += Vector3.forward * speed * Time.deltaTime;
+            }
             else if (ball.transform.position.z < transform.position.z - offset)
-                movement = Vector3.back;
+            {
+                transform.position += Vector3.back * speed * Time.deltaTime;
+            }
+
+            var positionZ = Mathf.Clamp(transform.position.z, topWallLimit, bottomWallLimit);
+            transform.position = new Vector3(transform.position.x, transform.position.y, positionZ);
         }
         else
         {
-            // In this case, we move the paddle towards initial position..
-            if (initialPosition.z > transform.position.z)
-                movement = Vector3.forward;
-            else if (initialPosition.z < transform.position.z)
-                movement = Vector3.back;
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            transform.position = initialPosition;
         }
-
-        rb.velocity = Vector3.Lerp(rb.velocity, movement * speed, lerpSpeed * Time.fixedDeltaTime);
     }
 }

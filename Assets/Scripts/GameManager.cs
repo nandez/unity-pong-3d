@@ -3,36 +3,42 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public TMPro.TMP_Text scoreText;
+    public static GameManager Instance { get; private set; }
+    public GameState State { get; private set; } = GameState.SERVE;
 
-    public AiController ai;
-    public BallController ball;
-    public PlayerController player;
-
-    [SerializeField]
     private int playerScore;
-
-    [SerializeField]
     private int aiScore;
+
+    public void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
+    }
+
+    public static void SetGameState(GameState state)
+    {
+        // TODO: validate state change...
+        Instance.State = state;
+    }
 
     public void OnPlayerScore()
     {
+        SetGameState(GameState.SCORE);
         playerScore++;
-        UpdateScoreText();
+
+        Invoke(nameof(ResetToServeState), 2f);
     }
 
-    public void OnAiScore()
+    public void onAiScore()
     {
+        SetGameState(GameState.SCORE);
         aiScore++;
-        UpdateScoreText();
+
+        Invoke(nameof(ResetToServeState), 2f);
     }
 
-    private void UpdateScoreText()
+    private void ResetToServeState()
     {
-        ai.ResetPosition();
-        ball.ResetPosition();
-        player.ResetPosition();
-
-        scoreText.text = $"{aiScore} | {playerScore}";
+        SetGameState(GameState.SERVE);
     }
 }

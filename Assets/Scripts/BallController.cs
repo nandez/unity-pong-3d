@@ -2,58 +2,61 @@ using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-    public GameManager scoreManager;
-    public float speed = 30f;
-    public GameObject goalFx;
+    [SerializeField] private Vector3 serveDirection = Vector3.zero;
+    [SerializeField] private float serveStrength = 10f;
+    [SerializeField] private float bounceMultiplier = 1.05f;
 
-    public Vector3 Direction { get; private set; }
-
+    private Rigidbody rb;
     private Vector3 initialPosition;
-
-    public void ResetPosition()
-    {
-        transform.position = initialPosition;
-    }
 
     private void Start()
     {
-        // Stores initial position to reset ball when goal is hit.
+        rb = GetComponent<Rigidbody>();
         initialPosition = transform.position;
-
-        // Determines a random direction to start ball movement:
-        // - Randomize x axis to launch the ball to one side.
-        // - Randomize z axis in a controlled way to give some noise to direction.
-        Direction = new Vector3(Random.value > 0.5f ? 1 : -1, 0, Random.Range(-0.35f, 0.35f));
     }
 
-    private void FixedUpdate()
+
+    private void Update()
     {
-        transform.position += speed * Time.fixedDeltaTime * Direction;
+        if (GameManager.Instance.State == GameState.SERVE)
+        {
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+            {
+                rb.AddForce((Random.Range(1, 3) % 2 == 0 ? Vector3.left : Vector3.right) * serveStrength);
+                GameManager.SetGameState(GameState.PLAY);
+            }
+        }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter(Collision col)
     {
-        var contact = collision.GetContact(0);
-        var reflectDirection = Vector3.Reflect(Direction, contact.normal);
-
-        // Randomize the z axis to give some variance.
-        reflectDirection.z += reflectDirection.z < 0 ? Random.Range(-0.025f, 0f) : Random.Range(0f, 0.025f);
-
-        Direction = reflectDirection;
-
-        // Checks if ball is colliding with a goal to reset the initial position
-        // and keep reflected direction so ball goes scorer side.
-        if (collision.collider.CompareTag("AiGoal"))
+        if (col.gameObject.CompareTag("PlayerHome"))
         {
-            scoreManager.OnPlayerScore();
-            Instantiate(goalFx, contact.point, Quaternion.identity);
-            transform.position = initialPosition;
+            GameManager.Instance.onAiScore();
+            ResetBall();
         }
-        else if (collision.collider.CompareTag("PlayerGoal"))
+        else if (col.gameObject.CompareTag("EnemyHome"))
         {
-            scoreManager.OnAiScore();
-            Instantiate(goalFx, contact.point, Quaternion.identity);
-            transform.position = initialPosition;
+            GameManager.Instance.OnPlayerScore();
+            ResetBall();
         }
+        else
+        {
+            if (rb.velocity.z == 0)
+                rb.AddForce(new Vector3(0, 0, Random.Range(1, 3) % 2 == 0 ? 1 : -1) * serveStrength);
+
+            if (rb.velocity.x > -1f && rb.velocity.x < 1f)
+                rb.AddForce(new Vector3(Random.Range(-1f, 1f), 0, 0) * serveStrength);
+
+            // Cuando la pelota rebota con la paleta, aumenta su velocidad
+            rb.velocity *= bounceMultiplier;
+        }
+    }
+
+    private void ResetBall()
+    {
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        transform.position = initialPosition;
     }
 }
