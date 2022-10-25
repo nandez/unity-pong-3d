@@ -12,11 +12,14 @@ public class BallController : MonoBehaviour
     private Rigidbody rb;
     private Vector3 initialPosition;
     private AudioSource audioSrc;
+    private TrailRenderer trailRnd;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         audioSrc = GetComponent<AudioSource>();
+        trailRnd = GetComponent<TrailRenderer>();
+
         initialPosition = transform.position;
     }
 
@@ -49,7 +52,7 @@ public class BallController : MonoBehaviour
         }
         else
         {
-            if(col.gameObject.CompareTag("Pad"))
+            if (col.gameObject.CompareTag("Pad"))
                 audioSrc.PlayOneShot(hitSfx);
 
             if (rb.velocity.z == 0)
@@ -58,7 +61,7 @@ public class BallController : MonoBehaviour
             if (rb.velocity.x > -1f && rb.velocity.x < 1f)
                 rb.AddForce(new Vector3(Random.Range(-1f, 1f), 0, 0) * serveStrength);
 
-            // Cuando la pelota rebota con la paleta, aumenta su velocidad
+            // Cuando la pelota rebota, aumenta su velocidad
             rb.velocity *= bounceMultiplier;
         }
     }
@@ -67,6 +70,12 @@ public class BallController : MonoBehaviour
     {
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+        Invoke(nameof(ResetPosition), 1f);
+    }
+
+    private void ResetPosition()
+    {
         transform.position = initialPosition;
+        trailRnd.Clear();
     }
 }
