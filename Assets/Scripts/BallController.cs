@@ -6,12 +6,17 @@ public class BallController : MonoBehaviour
     [SerializeField] private float serveStrength = 10f;
     [SerializeField] private float bounceMultiplier = 1.05f;
 
+    [SerializeField] private AudioClip hitSfx;
+    [SerializeField] private AudioClip scoreSfx;
+
     private Rigidbody rb;
     private Vector3 initialPosition;
+    private AudioSource audioSrc;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        audioSrc = GetComponent<AudioSource>();
         initialPosition = transform.position;
     }
 
@@ -32,16 +37,21 @@ public class BallController : MonoBehaviour
     {
         if (col.gameObject.CompareTag("PlayerHome"))
         {
+            audioSrc.PlayOneShot(scoreSfx);
             GameManager.Instance.onAiScore();
             ResetBall();
         }
         else if (col.gameObject.CompareTag("EnemyHome"))
         {
+            audioSrc.PlayOneShot(scoreSfx);
             GameManager.Instance.OnPlayerScore();
             ResetBall();
         }
         else
         {
+            if(col.gameObject.CompareTag("Pad"))
+                audioSrc.PlayOneShot(hitSfx);
+
             if (rb.velocity.z == 0)
                 rb.AddForce(new Vector3(0, 0, Random.Range(1, 3) % 2 == 0 ? 1 : -1) * serveStrength);
 
