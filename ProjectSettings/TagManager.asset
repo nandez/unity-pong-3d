@@ -4,8 +4,12 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - PlayerGoal
+  - EnemyHome
+  - PlayerHome
   - AiGoal
+  - PlayerGoal
+  - Wall
+  - Pad
   layers:
   - Default
   - TransparentFX

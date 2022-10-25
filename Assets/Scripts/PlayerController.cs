@@ -2,17 +2,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 20f;
+    [SerializeField] private float speed = 20f;
+    [SerializeField] private float topWallLimit = 14f;
+    [SerializeField] private float bottomWallLimit = 41f;
 
     private Rigidbody rb;
     private Vector3 initialPosition;
 
-    public void ResetPosition()
-    {
-        transform.position = initialPosition;
-    }
-
-    private void Awake()
+    private void Start()
     {
         rb = GetComponent<Rigidbody>();
         initialPosition = transform.position;
@@ -20,17 +17,18 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.UpArrow))
+        if (GameManager.Instance.State == GameState.PLAY)
         {
-            rb.velocity = new Vector3(0, 0, speed);
-        }
-        else if (Input.GetKey(KeyCode.DownArrow))
-        {
-            rb.velocity = new Vector3(0, 0, -speed);
+            var zMovement = Input.GetAxis("Vertical") * speed * Time.deltaTime;
+
+            if (transform.position.z > topWallLimit && transform.position.z < bottomWallLimit)
+                transform.Translate(0, 0, zMovement);
         }
         else
         {
             rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            transform.position = initialPosition;
         }
     }
 }
